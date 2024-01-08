@@ -37,10 +37,6 @@ void InsertBook(string bID);
 void Borrow(librarian lib);
 void Return();
 bool isNumeric(string input);
-//string hiddenInput(string = "");
-//string hideString(string);
-//string hideString(int);
-
 
 int main()
 {
@@ -133,7 +129,7 @@ void AdminRegister() //done
 {
 	admin newAcc;
 	page registerPage;
-	bool valid = true;
+	bool valid;
 	registerPage.header = "=========================================\n             Admin Register             \n=========================================\n";
 	registerPage.addOption("Name");
 	registerPage.addOption("Password");
@@ -141,7 +137,6 @@ void AdminRegister() //done
 	registerPage.addOption("Confirm");
 	registerPage.addOption("Back");
 	string tmpinput;
-	bool valid;
 	while (1)
 	{
 		switch (registerPage.prompt())
@@ -761,7 +756,7 @@ void Borrow(librarian lib)
 	brw.addOption("bID");
 	brw.addOption("UID");
 	brw.addOption("Borrow Date");
-	brw.addOption("Return Date");
+	//brw.addOption("Return Date");
 	brw.addOption("LibrarianID");
 	brw.addOption("Borrow");
 	brw.addOption("Back");
@@ -772,8 +767,6 @@ void Borrow(librarian lib)
 		case 1:
 			cout << "Book ID: ";
 			cin >> books.bID;
-			//books.returnTitle(books.bTitle);
-			//brw.setValue(0, books.bID);
 			if (books.isValidBook(books.bTitle))
 			{
 				issue.bID = books.bID;
@@ -795,44 +788,52 @@ void Borrow(librarian lib)
 			cout << "Borrow Date(YYYY/MM/DD): " << issue.brwDate;
 			brw.setValue(2, issue.brwDate);
 			break;
+			//case 4:
+				//issue.rtnDate = getRtnDate();
+				//issue.rtnDate = to_string(ltm->tm_year + 1900) + '/' + to_string(ltm->tm_mon + 1) + '/' + to_string(ltm->tm_mday + 14);
+				//cout << "Return Date(YYYY/MM/DD) : " << issue.rtnDate;
+				//brw.setValue(3, issue.rtnDate);
+			break;
 		case 4:
-
-			//issue.rtnDate = getRtnDate();
-			issue.rtnDate = to_string(ltm->tm_year + 1900) + '/' + to_string(ltm->tm_mon + 1) + '/' + to_string(ltm->tm_mday + 14);
-			cout << "Return Date(YYYY/MM/DD) : " << issue.rtnDate;
-			brw.setValue(3, issue.rtnDate);
+			issue.libID = lib.libID;
+			brw.setValue(3, issue.libID);
 			break;
 		case 5:
-			issue.libID = lib.libID;
-			brw.setValue(4, issue.libID);
-			break;
-		case 6:
-				if (books.bID.empty() || users.UID.empty() || issue.brwDate.empty() || issue.rtnDate.empty() || lib.libID.empty())
+			if (books.bID.empty() || users.UID.empty() || issue.brwDate.empty() || lib.libID.empty())
+			{
+				cout << "Please fill in all the information. Press Enter to continue.";
+				_getch();
+			}
+			else
+			{
+				if (users.UserBorrowRecord())
 				{
-					cout << "Please fill in all the information. Press Enter to continue.";
+					if (issue.isBookAvailable())
+					{
+						//cout << "The book is available.";
+						issue.GenCaseID();
+						issue.borrowBook();
+						issue.updateBookStatus(issue.caseID);
+						issue.updateRtnDate(issue.caseID);
+						cout << "This book has been successfully borrowed. The caseID is " << issue.caseID << endl;
+						cout << "The return date is " << issue.rtnDate << endl;
+						cout << "\nPress Enter to continue." << endl;
+						_getch();
+					}
+					else
+					{
+						cout << "This book is currently not available. Please insert other book." << endl;
+						_getch();
+					}
+				}
+				else
+				{
+					cout << "This user has book have not returned. All users are only allowed to borrow a book." << endl;
 					_getch();
 				}
-				else 
-				{
-						if (issue.isBookAvailable())
-						{
-							cout << "The book is available.";
-							issue.GenCaseID();
-							brw.setValue(5, issue.caseID);
-							issue.borrowBook();
-							issue.updateBookStatus(issue.bID);
-							cout << "This book has been successfully borrowed. The caseID is " << issue.caseID << endl;
-							cout << "\nPress Enter to continue." << endl;
-							_getch();
-						}
-						else
-						{
-							cout << "This book is currently not available. Please insert other book." << endl;
-							_getch();
-						}
-				}
+			}
 			break;
-		case 7:
+		case 6:
 			return;
 			break;
 		default:
@@ -872,7 +873,14 @@ void Return()
 			rtn.setValue(2, lib.libID);
 			break;
 		case 3:
-			issue.checkLateRtn();
+			if (issue.checkLateRtn())
+			{
+				//jump to fine calculation
+			}
+			else
+			{
+				issue.returnBook();
+			}
 			break;
 		}
 	}
@@ -1128,57 +1136,3 @@ bool isNumeric(string input) {
 	// if loop finishes means all is digit so return true
 	return true;
 }
-/*
-time_t time()
-{
-	struct tm
-	{
-		int tm_sec;   // seconds of minutes from 0 to 61
-		int tm_min;   // minutes of hour from 0 to 59
-		int tm_hour;  // hours of day from 0 to 24
-		int tm_mday;  // day of month from 1 to 31
-		int tm_mon;   // month of year from 0 to 11
-		int tm_year;  // year since 1900
-		int tm_wday;  // days since sunday
-		int tm_yday;  // days since January 1st
-	};
-	return time();
-}
-/*
-void getBrwDate()
-{
-	string brwDate;
-	auto now = chrono::system_clock::now();
-	time_t currentTime = chrono::system_clock::to_time_t(now);
-	tm localTimeInfo;
-	if (localtime_s(&localTimeInfo, &currentTime) != 0) {
-		cerr << "Failed to get local time" << endl;
-		return 1;
-	}
-	int currentYear = localTimeInfo.tm_year + 1900;
-	int currentMonth = localTimeInfo.tm_mon + 1;
-	int currentDay = localTimeInfo.tm_mday;
-	stringstream dd;
-	dd << currentYear << "/" << currentMonth << "/" << currentDay;
-	brwDate = dd.str();
-}
-void getRtnDate()
-{
-	string rtnDate;
-	auto now = chrono::system_clock::now();
-	time_t currentTime = chrono::system_clock::to_time_t(now);
-	tm localTimeInfo;
-
-	if (localtime_s(&localTimeInfo, &currentTime) != 0) {
-		cerr << "Failed to get local time" << endl;
-		return 1;
-	}
-
-	int currentYear = localTimeInfo.tm_year + 1900;
-	int currentMonth = localTimeInfo.tm_mon + 1;
-	int currentDay = localTimeInfo.tm_mday + 14;
-	stringstream dd;
-	dd << currentYear << "/" << currentMonth << "/" << currentDay;
-	rtnDate = dd.str();
-}
-*/

@@ -81,7 +81,7 @@ void book::GenBID()
 	b << "B" << setfill('0') << setw(5) << bookNo;
 	bID = b.str();
 }
-bool book::isValidBook(string & bTitle)
+bool book::isValidBook(string& bTitle)
 {
 	DBConnection db;
 	db.prepareStatement("SELECT Title FROM book WHERE BookID=? ");
@@ -113,7 +113,7 @@ string book::returnTitle(string& bTitle)
 		bTitle = db.res->getString("Title");
 		cout << "Book Title: " << bTitle << endl;
 	}
-	else 
+	else
 	{
 		cout << "This book does not exist. Please try again." << endl;
 		_getch();

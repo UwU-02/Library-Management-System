@@ -11,7 +11,7 @@ public:
 	string UID, username, email, uAddress;
 	int uContNo, userCount, userNo;
 	user();
-	user(string UID,string username, string email, string uAddress, int uContNo);
+	user(string UID, string username, string email, string uAddress, int uContNo);
 	~user();
 	void UserSearchBook();
 	void UserCount();

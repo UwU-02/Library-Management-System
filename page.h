@@ -5,18 +5,18 @@
 #include <string>
 #include <vector>
 #include <utility>
-using namespace std;
+
 class page
 {
 public:
-	string header, footer, bullet;
-    page();
-	void addOption(string option);
-	void setValue(int index, string value);
+	std::string header, footer, bullet;
+	page();
+	void addOption(std::string option);
+	void setValue(int index, std::string value);
 	int prompt();
 	~page();
 private:
-	std::vector<pair<string, string>> options;
+	std::vector<std::pair<std::string, std::string>> options;
 	// [ {"1","2"}  ,{"1","2"}  ]
 };
 
