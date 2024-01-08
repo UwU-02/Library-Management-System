@@ -809,10 +809,11 @@ void Borrow(librarian lib)
 						issue.borrowBook();
 						issue.updateBookStatus(issue.caseID);
 						issue.updateRtnDate(issue.caseID);
-						cout << "This book has been successfully borrowed. The caseID is " << issue.caseID << endl;
-						cout << "The return date is " << issue.rtnDate << endl;
-						cout << "\nPress Enter to continue." << endl;
+						cout << "\nThis book has been successfully borrowed.\n The caseID is " << issue.caseID <<".\n";
+						cout << "The return date is " << issue.rtnDate << "." << endl << endl;
+						cout << "Press Enter to continue." << endl;
 						_getch();
+						Borrow(lib);
 					}
 					else
 					{
@@ -824,6 +825,7 @@ void Borrow(librarian lib)
 				{
 					cout << "This user has book have not returned. All users are only allowed to borrow a book." << endl;
 					_getch();
+					
 				}
 			}
 			break;
@@ -845,13 +847,9 @@ void Return()
 	page rtn;
 	issueBook issue;
 	librarian lib;
-	bool valid;
-	time_t timep;
-	struct tm* ltm;
-	time(&timep);
-	ltm = gmtime(&timep);
+	char choice = '0';
 	rtn.header = "====================================\n               Return               \n====================================\n";
-	rtn.addOption("bID");
+	rtn.addOption("CaseID");
 	rtn.addOption("LibrarianID");
 	rtn.addOption("Check");
 	rtn.addOption("Back");
@@ -860,8 +858,8 @@ void Return()
 		switch (rtn.prompt())
 		{
 		case 1:
-			cin >> issue.bID;
-			rtn.setValue(1, issue.bID);
+			cin >> issue.caseID;
+			rtn.setValue(1, issue.caseID);
 			break;
 		case 2:
 			rtn.setValue(2, lib.libID);
@@ -869,12 +867,16 @@ void Return()
 		case 3:
 			if (issue.checkLateRtn())
 			{
-
-				//jump to fine calculation
+				fineCal();
+				cout << "Jump to Payment?(Y/N) : " << endl;
+				cin >> choice;
+				//jump to payment
 			}
 			else
 			{
 				issue.returnBook();
+				cout << "The book has been successfully returned. Press Enter to continue. " << endl;
+				_getch();
 			}
 			break;
 		}
@@ -883,9 +885,18 @@ void Return()
 
 void fineCal()
 {
-	page fine;
+	page f;
+	double fine;
 	issueBook issue;
-	fine.header = "===========================================\n                Late Return                \n===========================================\n";
+	ostringstream formattedPrice;
+	f.header = "===========================================\n                Late Return                \n===========================================\n";
+	issue.DaysCal ();
+	if (issue.daysCount < 0)
+	{
+		fine = issue.daysCount * 0.2;
+		formattedPrice << fixed << setprecision(2) << fine;
+		f.setValue(3, formattedPrice.str());
+	}
 
 }
 void InsertBook(string bID) //done

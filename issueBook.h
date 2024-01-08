@@ -21,8 +21,9 @@ public:
 	void GenCaseID();
 	void CaseCount();
 	bool checkLateRtn();
+	void DaysCal();
 	string caseID, brwDate, rtnDate, bID, UID, libID, rtn;
-	int caseNo;
+	int caseNo, daysCount;
 
 private:
 

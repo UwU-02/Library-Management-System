@@ -75,8 +75,8 @@ void issueBook::getRtnDate(string caseID)
 void issueBook::returnBook()
 {
 	DBConnection db;
-	//delete caseid
 	db.prepareStatement("UPDATE `issue book` SET Return? = 'YES' WHERE bID = ?");
+	db.stmt->setString(1, bID);
 	db.prepareStatement("UPDATE book SET Status = 'Available' WHERE BookID = ?");
 	db.stmt->setString(1, bID);
 	db.QueryStatement();
@@ -152,6 +152,21 @@ bool issueBook::checkLateRtn()
 		cout << "Error checking the return date." << endl;
 		return false;
 	}
+}
+
+void issueBook::DaysCal()
+{
+	DBConnection db;
+	db.prepareStatement("SELECT DATEDIFF(rtnDate, CURRENT_TIMESTAMP) from `issue book` WHERE CaseID = ?");
+	db.stmt->setString(1, caseID);
+	db.QueryResult();
+	if (db.res->rowsCount() == 1)
+	{
+		while (db.res->next())
+			daysCount = db.res->getInt("DAYSCOUNT");
+	}
+	else
+		cout << "Error retrieving days count." << endl;
 }
 
 issueBook::~issueBook()
