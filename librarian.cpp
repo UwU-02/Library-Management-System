@@ -69,7 +69,7 @@ void librarian::GenLibID()
 	l << "L" << setfill('0') << setw(2) << libNo;
 	libID = l.str();
 }
-                
+
 bool librarian::LibrarianLogin()
 {
 	DBConnection db;
@@ -77,7 +77,7 @@ bool librarian::LibrarianLogin()
 	db.stmt->setString(1, libID);
 
 	db.QueryResult();
-	if (db.res->rowsCount() == 1) 
+	if (db.res->rowsCount() == 1)
 	{
 		while (db.res->next())
 		{
@@ -86,7 +86,7 @@ bool librarian::LibrarianLogin()
 		db.~DBConnection();
 		return true;
 	}
-	else 
+	else
 	{
 		db.~DBConnection();
 		return false;
