@@ -35,7 +35,7 @@ issueBook::issueBook(string caseID, string brwDate, string rtnDate, string libID
 void issueBook::borrowBook()
 {
 	DBConnection db;
-	db.prepareStatement("INSERT INTO `issue book`(CaseID, bID, UID, libID, brwDate, rtnDate, Return?) VALUES (?,?,?,?,?,?,?)");
+	db.prepareStatement("INSERT INTO `issue book`(CaseID, bID, UID, libID, brwDate, rtnDate, `Return?`) VALUES (?,?,?,?,?,?,?)");
 	db.stmt->setString(1, caseID);
 	db.stmt->setString(2, bID);
 	db.stmt->setString(3, UID);
@@ -50,8 +50,7 @@ void issueBook::borrowBook()
 void issueBook::updateRtnDate(string caseID)
 {
 	DBConnection db;
-	db.prepareStatement("UPDATE `issue book` SET rtnDate = DATE_ADD(brwDate, INTERVAL 14 DAY) WHERE CaseID = ? ");
-	db.prepareStatement(" UPDATE `issue book` SET Return? = 'No' WHERE CaseID = ? ");
+	db.prepareStatement("UPDATE `issue book` SET rtnDate = DATE_ADD(brwDate, INTERVAL 14 DAY), `Return?` = 'No' WHERE CaseID = ? ");
 	db.stmt->setString(1, caseID);
 	db.QueryStatement();
 	getRtnDate(caseID);

@@ -36,6 +36,7 @@ void UserRegister(string UID);
 void InsertBook(string bID);
 void Borrow(librarian lib);
 void Return();
+void fineCal();
 bool isNumeric(string input);
 
 int main()
@@ -756,7 +757,6 @@ void Borrow(librarian lib)
 	brw.addOption("bID");
 	brw.addOption("UID");
 	brw.addOption("Borrow Date");
-	//brw.addOption("Return Date");
 	brw.addOption("LibrarianID");
 	brw.addOption("Borrow");
 	brw.addOption("Back");
@@ -787,12 +787,6 @@ void Borrow(librarian lib)
 			issue.brwDate = to_string(ltm->tm_year + 1900) + '/' + to_string(ltm->tm_mon + 1) + '/' + to_string(ltm->tm_mday);
 			cout << "Borrow Date(YYYY/MM/DD): " << issue.brwDate;
 			brw.setValue(2, issue.brwDate);
-			break;
-			//case 4:
-				//issue.rtnDate = getRtnDate();
-				//issue.rtnDate = to_string(ltm->tm_year + 1900) + '/' + to_string(ltm->tm_mon + 1) + '/' + to_string(ltm->tm_mday + 14);
-				//cout << "Return Date(YYYY/MM/DD) : " << issue.rtnDate;
-				//brw.setValue(3, issue.rtnDate);
 			break;
 		case 4:
 			issue.libID = lib.libID;
@@ -875,6 +869,7 @@ void Return()
 		case 3:
 			if (issue.checkLateRtn())
 			{
+
 				//jump to fine calculation
 			}
 			else
@@ -886,6 +881,13 @@ void Return()
 	}
 }
 
+void fineCal()
+{
+	page fine;
+	issueBook issue;
+	fine.header = "===========================================\n                Late Return                \n===========================================\n";
+
+}
 void InsertBook(string bID) //done
 {
 	book newBook;
