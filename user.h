@@ -21,6 +21,7 @@ public:
 	bool UserBorrowRecord();
 	void ViewUser();
 	void SearchUser();
+	void getUserData(string UID);
 	void UpdateUser();
 	void DeleteUser(string UID);
 

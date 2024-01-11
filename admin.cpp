@@ -147,10 +147,10 @@ void admin::ViewAdmin()
 void admin::AdminUpdate()
 {
 	DBConnection db;
-	db.prepareStatement("UPDATE admin SET AdminName = ?, AdminPassword = ?, AdminContactNo = ? WHERE AdminID = ? ");
+	db.prepareStatement("UPDATE admin SET AdminName = ?, AdminContactNo = ?, AdminPassword = ? WHERE AdminID = ? ");
 	db.stmt->setString(1, adminName);
-	db.stmt->setString(2, adminPwd);
-	db.stmt->setInt(3, adminContNo);
+	db.stmt->setInt(2, adminContNo);
+	db.stmt->setString(3, adminPwd);
 	db.stmt->setString(4, adminID);
 	db.QueryStatement();
 	db.~DBConnection();
@@ -159,7 +159,7 @@ void admin::AdminUpdate()
 void admin::getAdminData(string adminID)
 {
 	DBConnection db;
-	db.prepareStatement("SELECT* FROM admin WHERE AdminID=?");
+	db.prepareStatement("SELECT * FROM admin WHERE AdminID=?");
 	db.stmt->setString(1, adminID);
 	db.QueryResult();
 	if (db.res->rowsCount() > 0)

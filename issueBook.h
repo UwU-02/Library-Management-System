@@ -9,20 +9,20 @@ class issueBook
 {
 public:
 	issueBook();
-	issueBook(string caseID, string brwDate, string rtnDate, string bID, string UID, string libID, string rtn);
+	issueBook(string caseID, string brwDate, string expDate, string rtnDate, string libID, string UID, string bID, string rtn);
 	~issueBook();
 	void borrowBook();
-	void updateRtnDate(string caseID);
-	void getRtnDate(string caseID);
+	void updateExpDate(string caseID);
+	void getExpDate(string caseID);
 	void returnBook();
+	bool checkCase();
 	bool isBookAvailable();
-	//void updateBookCount(string bID);
 	void updateBookStatus(string bID);
 	void GenCaseID();
 	void CaseCount();
 	bool checkLateRtn();
 	void DaysCal();
-	string caseID, brwDate, rtnDate, bID, UID, libID, rtn;
+	string caseID, brwDate, expDate, rtnDate, bID, UID, libID, rtn;
 	int caseNo, daysCount;
 
 private:

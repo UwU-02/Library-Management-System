@@ -96,6 +96,7 @@ void librarian::LibrarianRecord()
 {
 	DBConnection db;
 	db.prepareStatement("SELECT * FROM librarian");
+	db.QueryStatement();
 }
 void librarian::ViewLibrarian()
 {
@@ -146,17 +147,17 @@ void librarian::LibUpdate()
 void librarian::getLibData(string libID)
 {
 	DBConnection db;
-	db.prepareStatement("SELECT* FROM librarian WHERE LibrarianID=?");
+	db.prepareStatement("SELECT * FROM librarian WHERE LibrarianID=?");
 	db.stmt->setString(1, libID);
 	db.QueryResult();
 	if (db.res->rowsCount() > 0)
 	{
 		while (db.res->next())
 		{
-			libID = db.res->getString("libID");
-			libName = db.res->getString("libName");
-			libAge = db.res->getInt("adminAge");
-			libContNo = db.res->getInt("libContNo");
+			libID = db.res->getString("LibrarianID");
+			libName = db.res->getString("LibrarianName");
+			libAge = db.res->getInt("Age");
+			libContNo = db.res->getInt("LibrarianContactNo");
 		}
 	}
 	db.~DBConnection();

@@ -81,7 +81,7 @@ void book::GenBID()
 	b << "B" << setfill('0') << setw(5) << bookNo;
 	bID = b.str();
 }
-bool book::isValidBook(string& bTitle)
+bool book::isValidBook(string bTitle)
 {
 	DBConnection db;
 	db.prepareStatement("SELECT Title FROM book WHERE BookID=? ");
@@ -104,24 +104,6 @@ bool book::isValidBook(string& bTitle)
 		return false;
 	}
 }
-/*
-string book::returnTitle(string& bTitle)
-{
-	DBConnection db;
-	if(isValidBook(bTitle))
-	{
-		bTitle = db.res->getString("Title");
-		cout << "Book Title: " << bTitle << endl;
-	}
-	else
-	{
-		cout << "This book does not exist. Please try again." << endl;
-		_getch();
-	}
-	db.~DBConnection();
-	return bTitle;
-}
-*/
 
 void book::SearchBook()
 {
@@ -130,23 +112,28 @@ void book::SearchBook()
 void book::GetBookData(string bID)
 {
 	DBConnection db;
-	db.prepareStatement("SELECT* FROM book WHERE bID=?");
+	db.prepareStatement("SELECT * FROM book WHERE BookID=?");
 	db.stmt->setString(1, bID);
 	db.QueryResult();
 	if (db.res->rowsCount() > 0)
 	{
 		while (db.res->next())
 		{
-			bID = db.res->getString("bID");
-			bTitle = db.res->getString("bTitle");
+			bID = db.res->getString("BookID");
+			bTitle = db.res->getString("Title");
 			Author = db.res->getString("Author");
-			bQuantity = db.res->getInt("bQuantity");
-			bPrice = db.res->getDouble("bPrice");
+			bQuantity = db.res->getInt("Quantity");
+			bPrice = db.res->getDouble("Price");
 			ISBN = db.res->getInt("ISBN");
-			bStatus = db.res->getString("bStatus");
-			category = db.res->getString("category");
-			language = db.res->getString("language");
+			bStatus = db.res->getString("Status");
+			category = db.res->getString("Category");
+			language = db.res->getString("Language");
 		}
+	}
+	else
+	{
+		cout << "Error retrieving book details." << endl;
+		_getch();
 	}
 	db.~DBConnection();
 }

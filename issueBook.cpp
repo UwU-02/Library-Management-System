@@ -20,11 +20,13 @@ issueBook::issueBook()
 	bID = "";
 	libID = "";
 	UID = "";
+	rtn = "";
 }
-issueBook::issueBook(string caseID, string brwDate, string rtnDate, string libID, string UID, string bID, string rtn)
+issueBook::issueBook(string caseID, string brwDate, string expDate, string rtnDate, string libID, string UID, string bID, string rtn)
 {
 	this->caseID = caseID;
 	this->brwDate = brwDate;
+	this->expDate = expDate;
 	this->rtnDate = rtnDate;
 	this->bID = bID;
 	this->libID = libID;
@@ -35,52 +37,74 @@ issueBook::issueBook(string caseID, string brwDate, string rtnDate, string libID
 void issueBook::borrowBook()
 {
 	DBConnection db;
-	db.prepareStatement("INSERT INTO `issue book`(CaseID, bID, UID, libID, brwDate, rtnDate, `Return?`) VALUES (?,?,?,?,?,?,?)");
+	db.prepareStatement("INSERT INTO `issue book`(CaseID, bID, UID, libID, brwDate, expDate, `Return?`) VALUES (?,?,?,?,?,?,?)");
 	db.stmt->setString(1, caseID);
 	db.stmt->setString(2, bID);
 	db.stmt->setString(3, UID);
 	db.stmt->setString(4, libID);
 	db.stmt->setString(5, brwDate);
-	db.stmt->setString(6, rtnDate);
+	db.stmt->setString(6, expDate);
 	db.stmt->setString(7, rtn);
 	db.QueryStatement();
 	//db.~DBConnection();
 }
 
-void issueBook::updateRtnDate(string caseID)
+void issueBook::updateExpDate(string caseID)
 {
 	DBConnection db;
-	db.prepareStatement("UPDATE `issue book` SET rtnDate = DATE_ADD(brwDate, INTERVAL 14 DAY), `Return?` = 'No' WHERE CaseID = ? ");
+	db.prepareStatement("UPDATE `issue book` SET expDate = DATE_ADD(brwDate, INTERVAL 14 DAY), `Return?` = 'No' WHERE CaseID = ? ");
 	db.stmt->setString(1, caseID);
 	db.QueryStatement();
-	getRtnDate(caseID);
+	getExpDate(caseID);
 }
 
-void issueBook::getRtnDate(string caseID)
+void issueBook::getExpDate(string caseID)
 {
 	DBConnection db;
-	db.prepareStatement("SELECT rtnDate FROM `issue book` WHERE CaseID = ? ");
+	db.prepareStatement("SELECT expDate FROM `issue book` WHERE CaseID = ? ");
 	db.stmt->setString(1, caseID);
 	db.QueryResult();
 	if (db.res->rowsCount() == 1)
 	{
 		while (db.res->next())
-			rtnDate = db.res->getString("rtnDate");
-		//cout << "The return date is " << rtnDate << endl;
+			expDate = db.res->getString("expDate");
 	}
 	else
-		cout << "Error retrieving the return date." << endl;
+		cout << "Error retrieving the expiry date." << endl;
 }
 
 void issueBook::returnBook()
 {
 	DBConnection db;
-	db.prepareStatement("UPDATE `issue book` SET Return? = 'YES' WHERE bID = ?");
-	db.stmt->setString(1, bID);
-	db.prepareStatement("UPDATE book SET Status = 'Available' WHERE BookID = ?");
-	db.stmt->setString(1, bID);
+	db.prepareStatement("UPDATE `issue book` SET rtnDate = ? WHERE CaseID = ?");
+	db.stmt->setString(1, rtnDate);
+	db.stmt->setString(2, caseID);
+	db.QueryStatement();
+	db.prepareStatement("UPDATE `issue book` SET `Return?` = 'YES' WHERE CaseID = ?");
+	db.stmt->setString(1, caseID);
+	db.QueryStatement();
+	db.prepareStatement("UPDATE book SET Status = 'Available' WHERE BookID = (SELECT bID FROM `issue book` WHERE CaseID = ?) ");
+	db.stmt->setString(1, caseID);
 	db.QueryStatement();
 	db.~DBConnection();
+}
+
+bool issueBook::checkCase()
+{
+	DBConnection db;
+	db.prepareStatement("SELECT * FROM `issue book` WHERE CaseID = ? AND `Return?` = 'No'");
+	db.stmt->setString(1, caseID);
+	db.QueryResult();
+	if (db.res->rowsCount() == 1) 
+	{
+		db.~DBConnection();
+		return true;
+	}
+	else
+	{
+		db.~DBConnection();
+		return false;
+	}
 }
 
 void issueBook::updateBookStatus(string bID)
@@ -90,15 +114,6 @@ void issueBook::updateBookStatus(string bID)
 	db.stmt->setString(1, bID);
 	db.QueryStatement();
 
-}
-
-void issueBook::GenCaseID()
-{
-	CaseCount();
-	caseNo++;
-	stringstream c;
-	c << "C" << setfill('0') << setw(5) << caseNo;
-	caseID = c.str();
 }
 
 bool issueBook::isBookAvailable()
@@ -117,10 +132,18 @@ bool issueBook::isBookAvailable()
 	}
 	else
 	{
-		_getch();
 		db.~DBConnection();
 		return false;
 	}
+}
+
+void issueBook::GenCaseID()
+{
+	CaseCount();
+	caseNo++;
+	stringstream c;
+	c << "C" << setfill('0') << setw(5) << caseNo;
+	caseID = c.str();
 }
 
 void issueBook::CaseCount()
@@ -140,30 +163,23 @@ void issueBook::CaseCount()
 bool issueBook::checkLateRtn()
 {
 	DBConnection db;
-	db.prepareStatement("SELECT * FROM `issue book` WHERE rtnDate < CURRENT_TIMESTAMP;");
+	db.prepareStatement("SELECT * FROM `issue book` WHERE expDate < CURRENT_TIMESTAMP AND CaseID = ?");
+	db.stmt->setString(1, caseID);
 	db.QueryResult();
-	if (db.res->rowsCount() == 1)
-	{
-		while (db.res->next())
-			return true;
-	}
-	else
-	{
-		cout << "Error checking the return date." << endl;
-		return false;
-	}
+	return db.res->rowsCount() == 1;
 }
 
 void issueBook::DaysCal()
 {
 	DBConnection db;
-	db.prepareStatement("SELECT DATEDIFF(rtnDate, CURRENT_TIMESTAMP) from `issue book` WHERE CaseID = ?");
+	db.prepareStatement("SELECT DATEDIFF(CURRENT_TIMESTAMP, expDate ) AS DAYSCOUNT from `issue book` WHERE CaseID = ?");
 	db.stmt->setString(1, caseID);
 	db.QueryResult();
 	if (db.res->rowsCount() == 1)
 	{
 		while (db.res->next())
 			daysCount = db.res->getInt("DAYSCOUNT");
+		cout << daysCount;
 	}
 	else
 		cout << "Error retrieving days count." << endl;

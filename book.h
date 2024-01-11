@@ -15,7 +15,7 @@ public:
 	void AddBook();
 	void BookCount();
 	void GenBID();
-	bool isValidBook(string& bTitle);
+	bool isValidBook(string bTitle);
 	//string returnTitle(string& bTitle);
 	void SearchBook();
 	void GetBookData(string bID);

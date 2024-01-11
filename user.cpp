@@ -109,7 +109,7 @@ bool user::isValidUser(string& username)
 bool user::UserBorrowRecord()
 {
 	DBConnection db;
-	db.prepareStatement("SELECT * FROM `issue book` WHERE UID=? ");
+	db.prepareStatement("SELECT * FROM `issue book` WHERE UID=? AND `Return?` = 'No'");
 	db.stmt->setString(1, UID);
 
 	db.QueryResult();
@@ -137,10 +137,35 @@ void user::SearchUser()
 {
 
 }
+
+void user::getUserData(string UID)
+{
+	DBConnection db;
+	db.prepareStatement("SELECT * FROM user WHERE UserID=?");
+	db.stmt->setString(1, UID);
+	db.QueryResult();
+	if (db.res->rowsCount() > 0)
+	{
+		while (db.res->next())
+		{
+			username = db.res->getString("UserName");
+			email = db.res->getString("email");
+			uContNo = db.res->getInt("ContactNo");
+			uAddress = db.res->getString("Address");
+		}
+	}
+	else
+	{
+		cout << "Error retrieving user details. ";
+		_getch();
+	}
+	db.~DBConnection();
+}
+
 void user::UpdateUser()
 {
 	DBConnection db;
-	db.prepareStatement("UPDATE user SET UserName=?, email=?,ContactNo=?, address=? WHERE UID=?");
+	db.prepareStatement("UPDATE user SET UserName=?, email=?,ContactNo=?, Address=? WHERE UID=?");
 	db.stmt->setString(1, username);
 	db.stmt->setInt(2, uContNo);
 	db.stmt->setString(3, email);
