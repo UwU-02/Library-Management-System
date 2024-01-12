@@ -8,6 +8,14 @@
 #include <sstream>
 #include <stdlib.h>
 #include <conio.h>
+#include <vector>
+#include <utility>
+#include <mysql/jdbc.h>
+
+using namespace std;
+using namespace sql;
+
+int userCount=0, userNo=0;
 
 user::user()
 {
@@ -18,18 +26,13 @@ user::user()
 	uAddress = "";
 }
 
-user::user(string UID, string username, string email, string uAddress, int uContNo)
+user::user(ResultSet* data)
 {
-	this->UID = UID;
-	this->username = username;
-	this->email = email;
-	this->uAddress = uAddress;
-	this->uContNo = uContNo;
-}
-
-void user::UserSearchBook()
-{
-
+	UID = data->getString("UserID");
+	username = data->getString("UserName");
+	email = data->getString("email");
+	uAddress = data->getString("Address");
+	uContNo = data->getInt("ContactNo");
 }
 
 void user::UserCount()
@@ -46,6 +49,7 @@ void user::UserCount()
 	else
 		cout << "Error retrieving user count." << endl;
 }
+
 void user::AddUser()
 {
 	DBConnection db;
@@ -58,6 +62,7 @@ void user::AddUser()
 	db.QueryStatement();
 	db.~DBConnection();
 }
+
 void user::GenUID()
 {
 	UserCount();
@@ -66,20 +71,7 @@ void user::GenUID()
 	u << "U" << setfill('0') << setw(4) << userNo;
 	UID = u.str();
 }
-/*
-int DBConnection::getGenId() {
-	DBConnection db;
-	db.prepareStatement("SELECT LAST_INSERT_ID();");
-	db.QueryResult();
-	int lastInsertId = -1;
-	if (db.res->rowsCount() > 0) {
-		while (db.res->next()) {
-			lastInsertId = db.res->getInt64("LAST_INSERT_ID()");
-		}
-	}
-	return lastInsertId;
-}
-*/
+
 bool user::isValidUser(string& username)
 {
 	DBConnection db;
@@ -106,6 +98,7 @@ bool user::isValidUser(string& username)
 		return false;
 	}
 }
+
 bool user::UserBorrowRecord()
 {
 	DBConnection db;
@@ -129,13 +122,27 @@ bool user::UserBorrowRecord()
 		return true;
 	}
 }
-void user::ViewUser()
-{
 
-}
-void user::SearchUser()
+vector <user> user::SearchUser(string keyword)
 {
+	DBConnection db;
+	vector <user> users;
 
+	string query = "SELECT * FROM user WHERE (UserName like ?)";
+	db.prepareStatement(query);
+	db.stmt->setString(1, "%" + keyword + "%");
+	db.QueryResult();
+
+	if (db.res->rowsCount() > 0)
+	{
+		while (db.res->next()) {
+			user tmpUser(db.res);
+			users.push_back(tmpUser);
+		}
+	}
+
+	db.~DBConnection();
+	return users;
 }
 
 void user::getUserData(string UID)
@@ -165,7 +172,7 @@ void user::getUserData(string UID)
 void user::UpdateUser()
 {
 	DBConnection db;
-	db.prepareStatement("UPDATE user SET UserName=?, email=?,ContactNo=?, Address=? WHERE UID=?");
+	db.prepareStatement("UPDATE user SET UserName=?, email=?, ContactNo=?, Address=? WHERE UserID=?");
 	db.stmt->setString(1, username);
 	db.stmt->setInt(2, uContNo);
 	db.stmt->setString(3, email);

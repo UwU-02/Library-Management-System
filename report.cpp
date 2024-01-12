@@ -11,51 +11,82 @@
 #include <conio.h>
 #include <vector>
 #include <utility>
+#include <mysql/jdbc.h>
 
 using namespace std;
 using namespace sql;
 
-report::report()
+report::report(ResultSet* data)
 {
-    issueCount = 0;
+	issueCount = data->getInt("BorrowersCount");
+	bTitle = data->getString("Title");
 }
 
-void report::TopTenPopularBook()
+vector<report> report::TopPopularBook(string brwDate)
 {
+	vector <report> TopPopularBook;
 	DBConnection db;
-	db.prepareStatement("SELECT Title, COUNT(*) AS BorrowersCount FROM `issue book` JOIN book ON `issue book`.bID = book.BookID GROUP BY book.Title ORDER BY issue_count DESC LIMIT 10 ");
-	db.QueryStatement();
+	db.prepareStatement("SELECT B.Title as Title,COUNT(I.bID) AS BorrowersCount FROM `issue book` I JOIN book B ON I.bID = B.BookID WHERE I.brwDate >= ? GROUP BY Title ORDER BY BorrowersCount DESC LIMIT 10 ");
+	db.stmt->setString(1, brwDate);
+
+	db.QueryResult();
+
+	if (db.res->rowsCount() > 0)
+	{
+		while (db.res->next())
+		{
+			report tmpReport(db.res);
+			TopPopularBook.push_back(tmpReport);
+		}
+	}
 	db.~DBConnection();
-	return;
+	return TopPopularBook;
 }
 
-vector<pair<string, int>> getTopTenBooks() 
+vector<report> report::TopTenEngFic(string brwDate)
 {
-    DBConnection db;
-    book books;
-    try {
-        db.prepareStatement("SELECT book.Title, COUNT(*) AS BorrowerCount FROM  `issue book` JOIN book ON `issue book`.bID = book.BookID GROUP BY book.Title ORDER BY BorrowerCount DESC LIMIT 10");
+	vector <report> TopTenEngFic;
+	DBConnection db;
+	db.prepareStatement("SELECT B.Title AS Title, COUNT(I.bID) AS BorrowersCount FROM `issue book` I JOIN book B ON I.bID = B.BookID WHERE I.brwDate >= ? AND B.Category = 'Fiction' AND B.Language = 'English' GROUP BY Title ORDER BY BorrowersCount DESC LIMIT 10 ");
+	db.stmt->setString(1, brwDate);
 
-        db.QueryResult();
+	db.QueryResult();
 
-        vector<pair<string, int>> topTen;
-        while (db.res->next()) {
-            string title = db.res->getString("Title");
-            int issueCount = db.res->getInt("BorrowerCount");
-            topTen.push_back({ books.bTitle, issueCount });
-        }
-
-        cout << "Top 10 Popular Books:\n";
-        for (const auto& book : topTen) {
-            cout << book.first << " (Issued: " << book.second << " times)\n";
-        }
-    }
-    catch (sql::SQLException& e) {
-        cerr << "Error: " << e.what() << endl;
-    }
-
-    return {};
+	if (db.res->rowsCount() > 0)
+	{
+		while (db.res->next())
+		{
+			report tmpReport(db.res);
+			TopTenEngFic.push_back(tmpReport);
+		}
+	}
+	db.~DBConnection();
+	return TopTenEngFic;
 }
+
+vector<report> report::TopTenMalayFic(string brwDate)
+{
+	vector <report> TopTenMalayFic;
+	DBConnection db;
+	db.prepareStatement("SELECT B.Title AS Title, COUNT(I.bID) AS BorrowersCount FROM `issue book` I JOIN book B ON I.bID = B.BookID WHERE I.brwDate >= ? AND B.Category = 'Fiction' AND B.Language = 'Malay' GROUP BY Title ORDER BY BorrowersCount DESC LIMIT 10 ");
+	db.stmt->setString(1, brwDate);
+
+	db.QueryResult();
+
+	if (db.res->rowsCount() > 0)
+	{
+		while (db.res->next())
+		{
+			report tmpReport(db.res);
+			TopTenMalayFic.push_back(tmpReport);
+		}
+	}
+	db.~DBConnection();
+	return TopTenMalayFic;
+}
+
+
+
 
 report::~report()
 {

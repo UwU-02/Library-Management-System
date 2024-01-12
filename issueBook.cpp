@@ -11,7 +11,15 @@
 #include <sstream>
 #include <stdlib.h>
 #include <conio.h>
+#include <vector>
+#include <utility>
+#include <mysql/jdbc.h>
+
 using namespace std;
+using namespace sql;
+
+int issueBook::caseNo=0;
+
 issueBook::issueBook()
 {
 	caseID = "";
@@ -21,17 +29,19 @@ issueBook::issueBook()
 	libID = "";
 	UID = "";
 	rtn = "";
+	daysCount = 0;
 }
-issueBook::issueBook(string caseID, string brwDate, string expDate, string rtnDate, string libID, string UID, string bID, string rtn)
+
+issueBook::issueBook(ResultSet* data)
 {
-	this->caseID = caseID;
-	this->brwDate = brwDate;
-	this->expDate = expDate;
-	this->rtnDate = rtnDate;
-	this->bID = bID;
-	this->libID = libID;
-	this->UID = UID;
-	this->rtn = rtn;
+	caseID = data->getString("CaseID");
+	brwDate = data->getString("brwDate");
+	expDate = data->getString("expDate");
+	rtnDate = data->getString("rtnDate");
+	bID = data->getString("bID");
+	libID = data->getString("libID");
+	UID = data->getString("UID");
+	rtn = data->getString("Return?");
 }
 
 void issueBook::borrowBook()
@@ -46,7 +56,10 @@ void issueBook::borrowBook()
 	db.stmt->setString(6, expDate);
 	db.stmt->setString(7, rtn);
 	db.QueryStatement();
-	//db.~DBConnection();
+	db.prepareStatement("UPDATE book SET Status = 'Borrowing' WHERE BookID = (SELECT bID FROM `issue book` WHERE CaseID = ?) ");
+	db.stmt->setString(1, caseID);
+	db.QueryStatement();
+	db.~DBConnection();
 }
 
 void issueBook::updateExpDate(string caseID)
@@ -172,7 +185,7 @@ bool issueBook::checkLateRtn()
 void issueBook::DaysCal()
 {
 	DBConnection db;
-	db.prepareStatement("SELECT DATEDIFF(CURRENT_TIMESTAMP, expDate ) AS DAYSCOUNT from `issue book` WHERE CaseID = ?");
+	db.prepareStatement("SELECT DATEDIFF(CURRENT_TIMESTAMP, expDate) AS DAYSCOUNT from `issue book` WHERE CaseID = ?");
 	db.stmt->setString(1, caseID);
 	db.QueryResult();
 	if (db.res->rowsCount() == 1)
@@ -184,6 +197,12 @@ void issueBook::DaysCal()
 	else
 		cout << "Error retrieving days count." << endl;
 }
+
+/*vector<report> report::brwReceipt(string caseID)
+{
+
+}*/
+
 
 issueBook::~issueBook()
 {

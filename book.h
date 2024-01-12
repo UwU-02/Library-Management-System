@@ -3,31 +3,33 @@
 #include<iostream>
 #include <mysql/jdbc.h>
 #include <string>
+#include <vector> 
+#include <utility>  
 using namespace std;
-
+using namespace sql;
 class book
 {
 public:
 	book();
-	book(string bID, string bTitle, string Author, string bStatus, string category, string language, int bQuantity, double bPrice, long ISBN);
+	book(ResultSet* data);
 	~book();
 	void ViewBook();
 	void AddBook();
 	void BookCount();
 	void GenBID();
 	bool isValidBook(string bTitle);
-	//string returnTitle(string& bTitle);
 	void SearchBook();
 	void GetBookData(string bID);
 	void UpdateBook();
 	void DeleteBook(string bID);
-	string bID, bTitle, Author, bStatus, category, language, UID;
+	static vector<book> NewStock();
+	static vector <book> SearchBook(string keyword);
+	string bID, bTitle, Author, bStatus, category, language;
 	int bQuantity, ISBN;
 	double bPrice;
-	int bookCount, bookNo;
 
 private:
-
+	static int bookCount, bookNo;
 };
 #endif
 

@@ -10,7 +10,12 @@
 #include <sstream>
 #include <stdlib.h>
 #include <conio.h>
+#include <vector>
+#include <utility>
+#include <mysql/jdbc.h>
+
 using namespace std;
+using namespace sql;
 
 finePayment::finePayment()
 {
@@ -22,26 +27,28 @@ finePayment::finePayment()
 	payMethod = "";
 }
 
-finePayment::finePayment(string caseID, string rtnDate, string UID, string libID, string rtn, string payID, string payMethod, double fine)
+finePayment::finePayment(ResultSet* data)
 {
-	this->payID = payID;
-	this->caseID = caseID;
-	this->UID = UID;
-	this->libID = libID;
-	this->fine = fine;
-	this->payMethod = payMethod;
+	payID = data->getString("payID");
+	caseID = data->getString("caseID");
+	UID = data->getString("UID");
+	libID = data->getString("libID");
+	fine = data->getDouble("fine");
+	payMethod = data->getString("payMethod");
+	payDate = data->getString("payDate");
 }
 
 void finePayment::insertPay()
 {
 	DBConnection db;
-	db.prepareStatement("INSERT INTO finepayment (payID, caseID, UID, libID, fine, PayMethod) VALUES (?,?,?,?,?,?)");
+	db.prepareStatement("INSERT INTO finepayment (payID, caseID, UID, libID, fine, PayMethod, payDate) VALUES (?,?,?,?,?,?,?)");
 	db.stmt->setString(1, payID);
 	db.stmt->setString(2, caseID);
 	db.stmt->setString(3, UID);
 	db.stmt->setString(4, libID);
 	db.stmt->setDouble(5, fine);
 	db.stmt->setString(6, payMethod);
+	db.stmt->setString(7, payDate);
 	db.QueryStatement();
 	db.prepareStatement("UPDATE finepayment SET UID= (SELECT UID from `issue book` WHERE CaseID =?)");
 	db.stmt->setString(1, caseID);
@@ -70,6 +77,27 @@ void finePayment::genPayID()
 	stringstream p;
 	p << "P" << setfill('0') << setw(5) << paymentNo;
 	payID = p.str();
+}
+
+vector<finePayment> finePayment::LateReturnReport(string payDate)
+{
+	vector <finePayment> lrr;
+	DBConnection db;
+	db.prepareStatement("SELECT * FROM finepayment WHERE payDate >= ? ORDER BY payID ASC");
+	db.stmt->setString(1, payDate);
+
+	db.QueryResult();
+
+	if (db.res->rowsCount() > 0)
+	{
+		while (db.res->next())
+		{
+			finePayment tmpReport(db.res);
+			lrr.push_back(tmpReport);
+		}
+	}
+	db.~DBConnection();
+	return lrr;
 }
 
 finePayment::~finePayment()

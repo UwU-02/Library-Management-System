@@ -5,10 +5,15 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <sstream>
 #include <stdlib.h>
 #include <conio.h>
-#include <sstream>
+#include <vector>
+#include <utility>
+#include <mysql/jdbc.h>
+
 using namespace std;
+using namespace sql;
 
 librarian::librarian()
 {
@@ -17,22 +22,14 @@ librarian::librarian()
 	libAge = 0;
 	libContNo = 0;
 }
-librarian::librarian(string libID, string libName, int ligAge, int libContNo)
-{
-	this->libID = libID;
-	this->libName = libName;
-	this->libAge = libAge;
-	this->libContNo = libContNo;
-}
 
-/*librarian::librarian(sql::ResultSet* data)
+librarian::librarian(ResultSet* data)
 {
-	libID = data->getString("libID");
-	libName = data->getString("libName");
-	libAge = data->getInt("libAge");
-	libContNo = data->getInt("libContNo");
+	libID = data->getString("LibrarianID");
+	libName = data->getString("LibrarianName");
+	libAge = data->getInt("Age");
+	libContNo = data->getInt("LibrarianContactNo");
 }
-*/
 
 void librarian::AddLibrarian()
 {
@@ -92,46 +89,26 @@ bool librarian::LibrarianLogin()
 		return false;
 	}
 }
-void librarian::LibrarianRecord()
+
+vector<librarian> librarian::SearchLibrarian()
 {
 	DBConnection db;
+	vector<librarian> lib;
 	db.prepareStatement("SELECT * FROM librarian");
-	db.QueryStatement();
-}
-void librarian::ViewLibrarian()
-{
 
-}
-/*
-vector<librarian> librarian::SearchLibrarian(string keyword, string sortColumn,int minAge, int maxAge, bool asc)
-{
-	string query = "SELECT * FROM 'librarian' WHERE (LibrarianName LIKE ? OR Address LIKE ?) AND Age >= ? AND Age <= ? ORDER BY " + sortColumn;
-	if (asc)
-		query += " ASC";
-	else
-		query += " DESC";
-	vector<librarian> librarians;
-	DBConnection db;
-	db.prepareStatement(query);
-	db.stmt->setString(1, "%" + keyword + "%");
-	db.stmt->setString(2, "%" + keyword + "%");
-	db.stmt->setInt(3, minAge)
-	db.stmt->setInt(4, maxAge);
-
-	vector<librarian> librarians;
 	db.QueryResult();
 	if (db.res->rowsCount())
 	{
 		while (db.res->next() > 0)
 		{
 			librarian tempLib(db.res);
-			librarians.push_back(tempLib);
+			lib.push_back(tempLib);
 		}
 	}
 	db.~DBConnection();
-	return librarians;
+	return lib;
 }
-*/
+
 void librarian::LibUpdate()
 {
 	DBConnection db;
@@ -172,6 +149,7 @@ void librarian::DeleteLibrarian(string libID)
 	db.QueryStatement();
 	db.~DBConnection();
 }
+
 librarian::~librarian()
 {
 

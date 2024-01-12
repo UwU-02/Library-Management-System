@@ -1,29 +1,29 @@
 #ifndef LIBRARIAN_H
 #define LIBRARIAN_H
-#include<iostream>
 #include <mysql/jdbc.h>
 #include <string>
+#include <vector> 
+#include <utility>  
 using namespace std;
+using namespace sql;
 
 class librarian
 {
 public:
+	string libID, libName;
+	int libAge, libContNo, libNo;
+
 	librarian();
-	librarian(string libID, string libName, int ligAge, int libContNo);
-	//librarian(sql::ResultSet* Data);
+	librarian(ResultSet* data);
 	~librarian();
 	void LibrarianCount();
 	void GenLibID();
 	void AddLibrarian();
 	bool LibrarianLogin();
-	void LibrarianRecord();
-	void ViewLibrarian();
-	//vector<librarian> SearchLibrarian(string keyword,string sortColumn, int minAge, int maxAge, bool asc);
+	static vector<librarian> SearchLibrarian();
 	void LibUpdate();
 	void getLibData(string libID);
 	void DeleteLibrarian(string libID);
-	string libID, libName;
-	int libAge, libContNo, libNo;
 
 private:
 

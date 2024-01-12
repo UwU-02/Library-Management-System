@@ -1,15 +1,20 @@
 #ifndef ISSUEBOOK_H
 #define ISSUEBOOK_H
-#include<iostream>
 #include <mysql/jdbc.h>
 #include <string>
+#include <vector> 
+#include <utility>  
 using namespace std;
+using namespace sql;
 
 class issueBook
 {
 public:
+	string caseID, brwDate, expDate, rtnDate, bID, UID, libID, rtn;
+	int daysCount;
+
 	issueBook();
-	issueBook(string caseID, string brwDate, string expDate, string rtnDate, string libID, string UID, string bID, string rtn);
+	issueBook(ResultSet* data);
 	~issueBook();
 	void borrowBook();
 	void updateExpDate(string caseID);
@@ -22,11 +27,11 @@ public:
 	void CaseCount();
 	bool checkLateRtn();
 	void DaysCal();
-	string caseID, brwDate, expDate, rtnDate, bID, UID, libID, rtn;
-	int caseNo, daysCount;
+
+	//  static vector<report> brwReceipt(string caseID);
 
 private:
-
+	static int caseNo;
 };
 #endif
 

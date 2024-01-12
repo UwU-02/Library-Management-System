@@ -8,7 +8,13 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <sstream>
+#include <vector>
+#include <utility>
+
 using namespace std;
+using namespace sql;
+
+int book::bookCount = 0, book::bookNo = 0;
 
 book::book()
 {
@@ -23,22 +29,17 @@ book::book()
 	language = "";
 }
 
-book::book(string bID, string bTitle, string Author, string bStatus, string category, string language, int bQuantity, double bPrice, long ISBN)
+book::book(ResultSet* data)
 {
-	this->bID = bID;
-	this->bTitle = bTitle;
-	this->Author = Author;
-	this->bQuantity = bQuantity;
-	this->bPrice = bPrice;
-	this->ISBN = ISBN;
-	this->bStatus = bStatus;
-	this->category = category;
-	this->language = language;
-}
-
-void book::ViewBook()
-{
-
+	bID = data->getString("BookID");
+	bTitle = data->getString("Title");
+	Author = data->getString("Author");
+	bQuantity = data->getInt("Quantity");
+	bPrice = data->getDouble("Price");
+	ISBN = data->getInt("ISBN");
+	bStatus = data->getString("Status");
+	category = data->getString("Category");
+	language = data->getString("Language");
 }
 
 void book::AddBook()
@@ -81,6 +82,7 @@ void book::GenBID()
 	b << "B" << setfill('0') << setw(5) << bookNo;
 	bID = b.str();
 }
+
 bool book::isValidBook(string bTitle)
 {
 	DBConnection db;
@@ -109,6 +111,7 @@ void book::SearchBook()
 {
 
 }
+
 void book::GetBookData(string bID)
 {
 	DBConnection db;
@@ -137,6 +140,7 @@ void book::GetBookData(string bID)
 	}
 	db.~DBConnection();
 }
+
 void book::UpdateBook()
 {
 	DBConnection db;
@@ -153,6 +157,7 @@ void book::UpdateBook()
 	db.QueryStatement();
 	db.~DBConnection();
 }
+
 void book::DeleteBook(string bID)
 {
 	DBConnection db;
@@ -161,6 +166,53 @@ void book::DeleteBook(string bID)
 	db.QueryStatement();
 	db.~DBConnection();
 }
+
+vector<book> book::NewStock()
+{
+	vector <book> Book;
+	DBConnection db;
+	db.prepareStatement("SELECT * FROM book ORDER BY BookID DESC LIMIT 20 ");
+	db.QueryResult();
+
+	if (db.res->rowsCount() > 0)
+	{
+		while (db.res->next())
+		{
+			book tmpReport(db.res);
+			Book.push_back(tmpReport);
+		}
+	}
+	db.~DBConnection();
+	return Book;
+}
+
+vector <book> book::SearchBook(string keyword)
+{
+	DBConnection db;
+	vector <book> books;
+
+	string query = "SELECT * FROM book WHERE (Title like ? OR Author like ? OR Status like ? OR Category like ? OR Language like ?)";
+	db.prepareStatement(query);
+	db.stmt->setString(1, "%" + keyword + "%");
+	db.stmt->setString(2, "%" + keyword + "%");
+	db.stmt->setString(3, "%" + keyword + "%");
+	db.stmt->setString(4, "%" + keyword + "%");
+	db.stmt->setString(5, "%" + keyword + "%");
+
+	db.QueryResult();
+
+	if (db.res->rowsCount() > 0)
+	{
+		while (db.res->next()) {
+			book tmpUser(db.res);
+			books.push_back(tmpUser);
+		}
+	}
+
+	db.~DBConnection();
+	return books;
+}
+
 book::~book()
 {
 
