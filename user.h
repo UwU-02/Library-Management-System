@@ -25,9 +25,11 @@ public:
 	void getUserData(string UID);
 	void UpdateUser();
 	void DeleteUser(string UID);
+	void defineLastRow();
+	void updateLastRow();
 
 private:
-
+	static string tmp;
 };
 #endif
 

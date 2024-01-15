@@ -15,6 +15,7 @@ using namespace std;
 using namespace sql;
 
 int book::bookCount = 0, book::bookNo = 0;
+string book::temp = "";
 
 book::book()
 {
@@ -27,6 +28,7 @@ book::book()
 	bStatus = "";
 	category = "";
 	language = "";
+	insertDate = "";
 }
 
 book::book(ResultSet* data)
@@ -40,12 +42,14 @@ book::book(ResultSet* data)
 	bStatus = data->getString("Status");
 	category = data->getString("Category");
 	language = data->getString("Language");
+	insertDate = data->getString("insertDate");
 }
 
 void book::AddBook()
 {
 	DBConnection db;
-	db.prepareStatement("INSERT INTO book(BookID, Title, Author, Quantity, Price, ISBN, Status, Category, Language) VALUES (?,?,?,?,?,?,?,?,?)");
+	db.prepareStatement("INSERT INTO book(BookID, Title, Author, Quantity, Price, ISBN, Status, Category, Language, insertDate) VALUES (?,?,?,?,?,?,?,?,?,?)");
+	db.stmt->setString(1, bID);
 	db.stmt->setString(1, bID);
 	db.stmt->setString(2, bTitle);
 	db.stmt->setString(3, Author);
@@ -55,6 +59,7 @@ void book::AddBook()
 	db.stmt->setString(7, bStatus);
 	db.stmt->setString(8, category);
 	db.stmt->setString(9, language);
+	db.stmt->setString(10, insertDate);
 	db.QueryStatement();
 	db.~DBConnection();
 }
@@ -83,6 +88,33 @@ void book::GenBID()
 	bID = b.str();
 }
 
+void book::defineLastRow()
+{
+	DBConnection db;
+	db.prepareStatement("SELECT * FROM book ORDER BY BookID DESC LIMIT 1");
+	db.QueryResult();
+
+	if (db.res->rowsCount() == 1) {
+		while (db.res->next()) {
+			temp = db.res->getString("BookID");
+		}
+	}
+	else {
+		std::cout << "Error retrieving book count." << std::endl;
+	}
+}
+
+void book::updateLastRow()
+{
+	defineLastRow();
+	DBConnection db;
+	db.prepareStatement("UPDATE book SET BookID =? WHERE BookID=?");
+	db.stmt->setString(1, bID);
+	db.stmt->setString(2, temp);
+	db.QueryStatement();
+	db.~DBConnection();
+}
+
 bool book::isValidBook(string bTitle)
 {
 	DBConnection db;
@@ -107,11 +139,6 @@ bool book::isValidBook(string bTitle)
 	}
 }
 
-void book::SearchBook()
-{
-
-}
-
 void book::GetBookData(string bID)
 {
 	DBConnection db;
@@ -131,12 +158,14 @@ void book::GetBookData(string bID)
 			bStatus = db.res->getString("Status");
 			category = db.res->getString("Category");
 			language = db.res->getString("Language");
+			insertDate = db.res->getString("insertDate");
 		}
 	}
 	else
 	{
 		cout << "Error retrieving book details." << endl;
 		_getch();
+		return;
 	}
 	db.~DBConnection();
 }
@@ -167,11 +196,14 @@ void book::DeleteBook(string bID)
 	db.~DBConnection();
 }
 
-vector<book> book::NewStock()
+vector<book> book::NewStock(string keyword)
 {
 	vector <book> Book;
 	DBConnection db;
-	db.prepareStatement("SELECT * FROM book ORDER BY BookID DESC LIMIT 20 ");
+	string query = "SELECT * FROM book WHERE insertDate >= ? ORDER BY BookID DESC";
+	db.prepareStatement(query);
+	db.stmt->setString(1, keyword);
+	
 	db.QueryResult();
 
 	if (db.res->rowsCount() > 0)
@@ -182,25 +214,43 @@ vector<book> book::NewStock()
 			Book.push_back(tmpReport);
 		}
 	}
+	else
+	{
+		cout << "No data found! Please try again.";
+		_getch();
+	}
 	db.~DBConnection();
 	return Book;
 }
 
-vector <book> book::SearchBook(string keyword)
+vector <book> book::SearchBook(string keyword, int choice)
 {
 	DBConnection db;
 	vector <book> books;
+	string query = "SELECT * FROM book WHERE ";
 
-	string query = "SELECT * FROM book WHERE (Title like ? OR Author like ? OR Status like ? OR Category like ? OR Language like ?)";
+	switch (choice) {
+	case 1: 
+		query += "Title like ?";
+		break;
+	case 2: 
+		query += "Author like ?";
+		break;
+	case 3:
+		query += "Status like ?";
+		break;
+	case 4:
+		query += "Category like ?";
+		break;
+	case 5:
+		query += "Language like ?";
+		break;
+
+	}
 	db.prepareStatement(query);
-	db.stmt->setString(1, "%" + keyword + "%");
-	db.stmt->setString(2, "%" + keyword + "%");
-	db.stmt->setString(3, "%" + keyword + "%");
-	db.stmt->setString(4, "%" + keyword + "%");
-	db.stmt->setString(5, "%" + keyword + "%");
-
+	db.stmt->setString(1, keyword + "%");
 	db.QueryResult();
-
+	
 	if (db.res->rowsCount() > 0)
 	{
 		while (db.res->next()) {
@@ -208,7 +258,11 @@ vector <book> book::SearchBook(string keyword)
 			books.push_back(tmpUser);
 		}
 	}
-
+	else
+	{
+		cout << "No book found! Please try again.";
+		_getch();
+	}
 	db.~DBConnection();
 	return books;
 }

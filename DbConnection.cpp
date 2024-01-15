@@ -35,8 +35,6 @@ DBConnection::DBConnection() {
 	}
 }
 
-
-
 DBConnection::~DBConnection() {
 	try {
 		if (connection) {

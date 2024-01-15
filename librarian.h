@@ -24,8 +24,10 @@ public:
 	void LibUpdate();
 	void getLibData(string libID);
 	void DeleteLibrarian(string libID);
+	void defineLastRow();
+	void updateLastRow();
 
 private:
-
+	static string tmp;
 };
 #endif
