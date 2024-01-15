@@ -13,7 +13,6 @@ public:
 	string payID, expDate, rtnDate, caseID, libID, UID, payMethod, payDate;
 	int paymentNo;
 	double fine;
-
 	finePayment();
 	finePayment(ResultSet* data);
 	void payCount();

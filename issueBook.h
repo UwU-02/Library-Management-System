@@ -28,8 +28,6 @@ public:
 	bool checkLateRtn();
 	void DaysCal();
 
-	//  static vector<report> brwReceipt(string caseID);
-
 private:
 	static int caseNo;
 };

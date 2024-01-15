@@ -6,6 +6,8 @@
 #include <vector>
 #include <sstream>
 #include <utility>
+#include<fstream>
+#include <regex>
 
 #include "DbConnection.h"
 #include "page.h"
@@ -32,12 +34,14 @@ void LibrarianList();
 librarian UpdateLibrarian(librarian lib);
 void LibrarianMenu(librarian lib);
 
+void LibMenuUser();
 void UserRegister();
 void UserMenu();
 void SearchUser();
 user UpdateUser(user users);
 void UpdateUserPartTwo(user users);
 
+void LibMenuBook();
 void InsertBook();
 void SearchBook();
 book UpdateBook(book books);
@@ -53,6 +57,7 @@ void malayBookList();
 void newStock();
 void lateReturnRepo();
 bool isNumeric(string input);
+bool validDate(const string& date);
 
 int main()
 {
@@ -139,8 +144,10 @@ void AdminRegister() //done
 				newAcc.GenAdminID();
 				registerPage.setValue(3, newAcc.adminID);
 				newAcc.AddAdmin();
-				cout << "Your admin ID is " << newAcc.adminID << endl;
-				cout << "Registered successfully. \nPress Enter to continue." << endl;
+				cout << "______________________________________________________\n\n";
+				cout << "\tYour admin ID is " << newAcc.adminID << endl;
+				cout << "______________________________________________________\n";
+				cout << "\nRegistered successfully. \nPress Enter to continue." << endl;
 				_getch();
 				main();
 			}
@@ -294,6 +301,7 @@ admin UpdateAdmin(admin Admin)
 			if (confirm == 'Y' || confirm == 'y')
 			{
 				Admin.DeleteAdmin(Admin.adminID);
+				Admin.updateLastRow();
 				cout << "Your account has been deleted. Press Enter to continue." << endl;
 				_getch();
 				main();
@@ -320,7 +328,6 @@ void LibrarianRegister() //done
 {
 	librarian newLib;
 	page registerPage;
-
 	registerPage.header = "===========================================\n             Librarian Register             \n===========================================\n";
 	registerPage.addOption("Name");
 	registerPage.addOption("Age");
@@ -362,10 +369,12 @@ void LibrarianRegister() //done
 				newLib.GenLibID();
 				registerPage.setValue(4, newLib.libID);
 				newLib.AddLibrarian();
-				cout << "Your librarian ID is " << newLib.libID << endl;
-				cout << "Registered successfully. \nPress Enter to continue." << endl;
+				cout << "______________________________________________________\n\n";
+				cout << "\tYour librarian ID is " << newLib.libID << endl;
+				cout << "______________________________________________________\n";
+				cout << "\nRegistered successfully. \nPress Enter to continue." << endl;
 				_getch();
-				main();
+				return;
 			}
 			break;
 		case 5:
@@ -427,7 +436,7 @@ void LibrarianList()
 	while (1)
 	{
 		stringstream ss;
-		ss << "=========================================\n            List of Librarian            \n=========================================\n";
+		ss << "=========================================================================================================\n					   List of Librarian\n=========================================================================================================\n";
 
 		ss << endl << setfill(' ') << '|' << left << setw(15) << "     LibrarianID      " << setfill(' ') << '|' << setw(20) << "        Name               " << setfill(' ') << '|' << setw(10) << "         Age       " << setfill(' ') << '|' << setw(25) << "          Contact No            " << setfill(' ') << '|' << endl;
 
@@ -511,6 +520,7 @@ librarian UpdateLibrarian(librarian lib) //done
 			{
 				lib = temp;
 				lib.DeleteLibrarian(lib.libID);
+				lib.updateLastRow();
 				cout << "Your account has been deleted. Press Enter to continue." << endl;
 				_getch();
 				main();
@@ -542,14 +552,10 @@ void LibrarianMenu(librarian lib)
 	lmenu.header = "==============================\n        Librarian Menu        \n==============================\n";
 	lmenu.addOption("Borrow");
 	lmenu.addOption("Return");
-	lmenu.addOption("Add Book");
-	lmenu.addOption("Update Book Info");
-	lmenu.addOption("Search Book");
-	lmenu.addOption("Update Librarian Info");
-	lmenu.addOption("User Register");
-	lmenu.addOption("Search User");
-	lmenu.addOption("Update User Info");
+	lmenu.addOption("Manage Book");
+	lmenu.addOption("Manage User");
 	lmenu.addOption("Late Return Report");
+	lmenu.addOption("Update Librarian Info");
 	lmenu.addOption("Back to Main Menu");
 	while (1)
 	{
@@ -562,36 +568,56 @@ void LibrarianMenu(librarian lib)
 			Return(lib);
 			break;
 		case 3:
-			InsertBook();
+			LibMenuBook();
 			break;
 		case 4:
-			books = UpdateBook(books);
+			LibMenuUser();
 			break;
 		case 5:
-
+			lateReturnRepo();
 			break;
 		case 6:
 			lib = UpdateLibrarian(lib);
 			break;
 		case 7:
-			UserRegister();
-			break;
-		case 8:
-			SearchUser();
-			break;
-		case 9:
-			users = UpdateUser(users);
-			break;
-		case 10:
-			lateReturnRepo();
-			break;
-		case 11:
 			main();
 			break;
 		default:
 			break;
 		}
 	}
+}
+
+void LibMenuUser()
+{
+	page lmenu;
+	user users;
+	lmenu.header = "==============================\n        Librarian Menu        \n==============================\n";
+	lmenu.addOption("User Register");
+	lmenu.addOption("Update User Info");
+	lmenu.addOption("Search User");
+	lmenu.addOption("Back");
+	while (1)
+	{
+		switch (lmenu.prompt())
+		{
+		case 1:
+			UserRegister();
+			break;
+		case 2:
+			users = UpdateUser(users);			
+			break;
+		case 3:
+			SearchUser();
+			break;
+		case 4:
+			return;
+			break;
+		default:
+			break;
+		}
+	}
+
 }
 
 void UserRegister() //done
@@ -648,7 +674,9 @@ void UserRegister() //done
 				newUser.GenUID();
 				registerPage.setValue(3, newUser.UID);
 				newUser.AddUser();
-				cout << "Your user ID is " << newUser.UID << endl;
+				cout << "______________________________________________________\n\n";
+				cout << "\tThe user ID is " << newUser.UID << endl;
+				cout << "______________________________________________________\n\n";
 				cout << "Registered successfully. \nPress Enter to continue." << endl;
 				_getch();
 				UserRegister();
@@ -703,7 +731,7 @@ void SearchUser()
 	while (1)
 	{
 		stringstream ss;
-		ss << "===========================================================================================\n                                       Search User                                         \n===========================================================================================\n";
+		ss << "==============================================================================================================\n                                                   Search User\n==============================================================================================================\n";
 
 		ss << endl << setfill(' ') << '|' << left << setw(10) << "UserID" << setfill(' ') << '|' << setw(40) << "   User Name" << setfill(' ') << '|' << setw(15) << "   Contact No" << setfill(' ') << '|' << setw(40) << "   Address" << setfill(' ') << '|' << endl;
 
@@ -813,6 +841,7 @@ void UpdateUserPartTwo(user users)
 			if (confirm == 'Y' || confirm == 'y')
 			{
 				users.DeleteUser(users.UID);
+				users.updateLastRow();
 				cout << "This user account has been deleted. Press Enter to continue." << endl;
 				_getch();
 				main();
@@ -836,10 +865,45 @@ void UpdateUserPartTwo(user users)
 	}
 }
 
+void LibMenuBook()
+{
+	page lmenu;
+	book books;
+	lmenu.header = "==============================\n        Librarian Menu        \n==============================\n";
+	lmenu.addOption("Add Book");
+	lmenu.addOption("Update Book Info");
+	lmenu.addOption("Search Book");
+	lmenu.addOption("Back");
+	while (1)
+	{
+		switch (lmenu.prompt())
+		{
+		case 1:
+			InsertBook();
+			break;
+		case 2:
+			books = UpdateBook(books);
+			break;
+		case 3:
+			SearchBook();
+			break;
+		case 4:
+			return;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 void InsertBook() //done
 {
 	book newBook;
 	page insertPage;
+	time_t timep;
+	struct tm* ltm;
+	time(&timep);
+	ltm = gmtime(&timep);
 	insertPage.header = "====================\n      Add Book      \n====================\n";
 	insertPage.addOption("Title");
 	insertPage.addOption("Author");
@@ -849,6 +913,7 @@ void InsertBook() //done
 	insertPage.addOption("Status");
 	insertPage.addOption("Category");
 	insertPage.addOption("Language");
+	insertPage.addOption("Date");
 	insertPage.addOption("Confirm");
 	insertPage.addOption("Back");
 	int cat, lang;
@@ -961,19 +1026,26 @@ void InsertBook() //done
 			}
 			break;
 		case 9:
+			newBook.insertDate = to_string(ltm->tm_year + 1900) + '-' + to_string(ltm->tm_mon + 1) + '-' + to_string(ltm->tm_mday);
+			cout << "Borrow Date(YYYY-MM-DD): " << newBook.insertDate;
+			insertPage.setValue(8, newBook.insertDate);
+			break;
+		case 10:
 			valid = true;
 			if (valid)
 			{
 				newBook.GenBID();
-				insertPage.setValue(3, newBook.bID);
+				insertPage.setValue(9, newBook.bID);
 				newBook.AddBook();
-				cout << newBook.bTitle << endl;
-				cout << "The book ID is " << newBook.bID << "\nPress Enter to continue" << endl;
+				cout << "______________________________________________________\n\n";
+				cout << "\tThe book ID is " << newBook.bID << endl;
+				cout << "______________________________________________________\n";
+				cout << "\n\nPress Enter to Continue.";
 				_getch();
 				InsertBook();
 			}
 			break;
-		case 10:
+		case 11:
 			return;
 			break;
 		}
@@ -992,7 +1064,7 @@ void SearchBook()
 	while (1)
 	{
 		stringstream ss;
-		ss << "===========================================================================================\n                                       Search Book                                         \n===========================================================================================\n";
+		ss << "=========================================================================================================\n                                           Search Book                                         \n=========================================================================================================\n";
 
 		ss << endl << setfill(' ') << '|' << left << setw(10) << "BookID" << setfill(' ') << '|' << setw(50) << "   Title" << setfill(' ') << '|' << setw(30) << "  Author" << setfill(' ') << '|' << setw(10) << "   Status" << setfill(' ') << '|' << endl;
 
@@ -1312,6 +1384,7 @@ void UpdateBookPartTwo(book books)
 			if (confirm == 'Y' || confirm == 'y')
 			{
 				books.DeleteBook(books.bID);
+				books.updateLastRow();
 				cout << "The book has been deleted. Press Enter to continue." << endl;
 				_getch();
 				main();
@@ -1399,9 +1472,11 @@ void Borrow(librarian lib)
 						issue.borrowBook();
 						issue.updateBookStatus(issue.caseID);
 						issue.updateExpDate(issue.caseID);
-						cout << "\nThis book has been successfully borrowed.\n The CaseID is " << issue.caseID <<".\n";
-						cout << "The EXPIRY DATE is " << issue.expDate << "." << endl << endl;
-						cout << "Press Enter to continue." << endl;
+						cout << "___________________________________________________________\n";
+						cout << "\n\tThe CaseID is " << issue.caseID <<".\n";
+						cout << "\tThe EXPIRY DATE is " << issue.expDate << "." << endl;
+						cout << "___________________________________________________________\n\n";
+						cout << "This book has been successfully borrowed. Press Enter to continue." << endl;
 						_getch();
 						Borrow(lib);
 					}
@@ -1511,6 +1586,7 @@ void fineCal(issueBook issue, finePayment payfine)
 	payfine.libID = issue.libID;
 	payfine.caseID = issue.caseID;
 	payfine.payDate = issue.rtnDate;
+	payfine.UID = issue.UID;
 	f.header = "===========================================\n                  Payment                  \n===========================================";
 	f.addOption("Cash");
 	f.addOption("Credit/Debit Card");
@@ -1596,7 +1672,7 @@ void popularBookList()
 {
 	page rep;
 	vector <report> result;
-	rep.addOption("Borrow Date");
+	rep.addOption("Date");
 	rep.addOption("Go");
 	rep.addOption("Back");
 	string brwDate;
@@ -1618,9 +1694,17 @@ void popularBookList()
 		switch (rep.prompt())
 		{
 		case 1:
-			cout << "Borrow Date: ";
+			cout << "Insert Date: ";
 			cin >> brwDate;
-			rep.setValue(0, brwDate);
+			if (!validDate(brwDate))
+			{
+				cout << "Invalid date. Please try again. ";
+				_getch();
+			}
+			else
+			{
+				rep.setValue(0, brwDate);
+			}
 			break;
 		case 2:
 			result.clear();
@@ -1641,7 +1725,7 @@ void engBookList()
 {
 	page rep;
 	vector <report> result;
-	rep.addOption("Borrow Date");
+	rep.addOption("Date");
 	rep.addOption("Go");
 	rep.addOption("Back");
 	string brwDate;
@@ -1663,9 +1747,17 @@ void engBookList()
 		switch (rep.prompt())
 		{
 		case 1:
-			cout << "Borrow Date: ";
+			cout << "Insert Date (YYYY-MM-DD): ";
 			cin >> brwDate;
-			rep.setValue(0, brwDate);
+			if (!validDate(brwDate))
+			{
+				cout << "Invalid date. Please try again. ";
+				_getch();
+			}
+			else
+			{
+				rep.setValue(0, brwDate);
+			}
 			break;
 		case 2:
 			result.clear();
@@ -1686,10 +1778,10 @@ void malayBookList()
 {
 	page rep;
 	vector <report> result;
-	rep.addOption("Borrow Date");
+	rep.addOption("Date");
 	rep.addOption("Go");
 	rep.addOption("Back");
-	string brwDate;
+	string keyword;
 
 	while (1)
 	{
@@ -1707,13 +1799,21 @@ void malayBookList()
 		switch (rep.prompt())
 		{
 		case 1:
-			cout << "Borrow Date: ";
-			cin >> brwDate;
-			rep.setValue(0, brwDate);
+			cout << "Insert Date (YYYY-MM-DD): ";
+			cin >> keyword;
+			if (!validDate(keyword))
+			{
+				cout << "Invalid date. Please try again. ";
+				_getch();
+			}
+			else
+			{
+				rep.setValue(0, keyword);
+			}
 			break;
 		case 2:
 			result.clear();
-			result = report::TopTenMalayFic(brwDate);
+			result = report::TopTenMalayFic(keyword);
 			break;
 		case 3:
 			return;
@@ -1730,20 +1830,22 @@ void newStock()
 {
 	page rep;
 	vector <book> result;
+	string insertDate;
+	string keyword = "";
+	rep.addOption("Date");
+	rep.addOption("Go");
 	rep.addOption("Back");
-
-	result = book::NewStock();
 
 	while(1)
 	{
 		stringstream ss;
 		ss << "===================================================================================\n                                    New Books                                      \n===================================================================================\n";
 
-		ss << endl << setfill(' ') << '|' << left << setw(10) << "BookID" << setfill(' ') << '|' << setw(70) << "   Title   " << setfill(' ') << '|' << endl;
+		ss << endl << setfill(' ') << '|' << left << setw(10) << "BookID" << setfill(' ') << '|' << setw(69) << "          Title" << setfill(' ') << '|' << endl;
 
 		for (int i = 0; i < result.size(); i++)
 		{
-			ss << endl << setfill(' ') << '|' << left << setw(10) << result[i].bID << setfill(' ') << '|' << "         " << setw(70) << result[i].bTitle << setfill(' ') << '|' << endl;
+			ss << endl << setfill(' ') << '|' << left << setw(10) << result[i].bID << setfill(' ') << '|' << "         " << setw(60) << result[i].bTitle << setfill(' ') << '|' << endl;
 		}
 
 		rep.header = ss.str();
@@ -1752,13 +1854,29 @@ void newStock()
 		switch (rep.prompt())
 		{
 		case 1:
+			cout << "Insert Date (YYYY-MM-DD): ";
+			cin >> keyword;
+			if (!validDate(keyword))
+			{
+				cout << "Invalid date. Please try again. ";
+				_getch();
+			}
+			else
+			{
+				rep.setValue(0, keyword);
+			}
+			break;
+		case 2:
+			result.clear();
+			result = book::NewStock(keyword);
+			break;
+		case 3:
 			return;
 			break;
 		default:
 			break;
 		}
 	}
-
 	return;
 }
 
@@ -1766,7 +1884,9 @@ void lateReturnRepo()
 {
 	page rep;
 	vector <finePayment> result;
-	string payDate;
+	string payDate="";
+	double totalFine = 0;
+	ofstream outputFile("Total_Fine_Report.txt");
 	rep.addOption("Checkout Date");
 	rep.addOption("Go");
 	rep.addOption("Back");
@@ -1781,20 +1901,59 @@ void lateReturnRepo()
 		for (int i = 0; i < result.size(); i++)
 		{
 			ss << endl << setfill(' ') << '|' << left << "     " << setw(15) << result[i].payID << setfill(' ') << '|' << "    " << setw(12) << result[i].UID << setfill(' ') << '|' << setw(10) << "     RM" << result[i].fine << "  " << setfill(' ') << '|' << "     " << setw(23) << result[i].payMethod << setfill(' ') << '|' << endl;
+			totalFine += result[i].fine;
 		}
 
+		ss << "\n\n_____________________________________________________________________________________" << endl << endl;
+		ss << "Total Fine: RM " << setprecision(2) << totalFine << endl;
+		ss << "_____________________________________________________________________________________" << endl;
 		rep.header = ss.str();
-
+		
 		switch (rep.prompt())
 		{
 		case 1:
-			cout << "Checkout Date: ";
+			cout << "Checkout Date (YYYY-MM-DD): ";
 			cin >> payDate;
-			rep.setValue(0, payDate);
+			if (!validDate(payDate))
+			{
+				cout << "Invalid date. Please try again. ";
+				_getch();
+			}
+			else 
+			{
+				rep.setValue(0, payDate);
+			}
 			break;
 		case 2:
 			result.clear();
 			result = finePayment::LateReturnReport(payDate);
+			if (outputFile.is_open())
+			{
+				ss.str(""); // Clear the stringstream
+				ss.clear();
+				ss << "===================================================================================\n                                   Late Return                                     \n===================================================================================\n";
+
+				ss << endl << setfill(' ') << '|' << left << setw(15) << "     PaymentID      " << setfill(' ') << '|' << setw(10) << "    UserID      " << setfill(' ') << '|' << setw(10) << "     Fine      " << setfill(' ') << '|' << setw(25) << "     Payment Method         " << setfill(' ') << '|' << endl;
+
+				for (int i = 0; i < result.size(); i++)
+				{
+					ss << endl << setfill(' ') << '|' << left << "     " << setw(15) << result[i].payID << setfill(' ') << '|' << "    " << setw(12) << result[i].UID << setfill(' ') << '|' << setw(10) << "     RM" << result[i].fine << "  " << setfill(' ') << '|' << "     " << setw(23) << result[i].payMethod << setfill(' ') << '|' << endl;
+
+				}
+
+				ss << "\n\n_____________________________________________________________________________________" << endl << endl;
+				ss << "Total Fine: RM " << setprecision(2) << totalFine << endl;
+				ss << "Date: " << payDate << endl;
+				ss << "_____________________________________________________________________________________" << endl;
+
+				outputFile << ss.str();
+				outputFile.close();
+			}
+			else 
+			{
+				cerr << "Error opening text file.\n";
+			}
+
 			break;
 		case 3:
 			return;
@@ -1816,4 +1975,28 @@ bool isNumeric(string input) {
 	}
 	// if loop finishes means all is digit so return true
 	return true;
+}
+
+bool validDate(const string& date)
+{
+	regex datePattern("^\\d{4}[/-]\\d{2}[/-]\\d{2}$"); 
+
+	if (!regex_match(date, datePattern)) {
+		return false;
+	}
+
+	tm tmDate = {};
+	stringstream ss(date);
+	ss >> get_time(&tmDate, "%Y/%m/%d");
+
+	if (ss.fail()) {
+		ss.clear();
+		ss.str(date);
+		ss >> get_time(&tmDate, "%Y-%m-%d");
+		if (ss.fail()) {
+			return false;
+		}
+	}
+
+	return mktime(&tmDate) != -1;
 }

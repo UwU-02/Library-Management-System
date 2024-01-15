@@ -15,6 +15,8 @@
 using namespace std;
 using namespace sql;
 
+string librarian::tmp = "";
+
 librarian::librarian()
 {
 	libID = "";
@@ -105,6 +107,11 @@ vector<librarian> librarian::SearchLibrarian()
 			lib.push_back(tempLib);
 		}
 	}
+	else
+	{
+		cout << "No librarian found! Please try again.";
+		_getch();
+	}
 	db.~DBConnection();
 	return lib;
 }
@@ -146,6 +153,33 @@ void librarian::DeleteLibrarian(string libID)
 	DBConnection db;
 	db.prepareStatement("DELETE FROM librarian WHERE LibrarianID = ?");
 	db.stmt->setString(1, libID);
+	db.QueryStatement();
+	db.~DBConnection();
+}
+
+void librarian::defineLastRow()
+{
+	DBConnection db;
+	db.prepareStatement("SELECT * FROM librarian ORDER BY LibrarianID DESC LIMIT 1");
+	db.QueryResult();
+
+	if (db.res->rowsCount() == 1) {
+		while (db.res->next()) {
+			tmp = db.res->getString("LibrarianID");
+		}
+	}
+	else {
+		std::cout << "Error retrieving librarian count." << std::endl;
+	}
+}
+
+void librarian::updateLastRow()
+{
+	defineLastRow();
+	DBConnection db;
+	db.prepareStatement("UPDATE book SET LibrarianID =? WHERE LibrarianID=?");
+	db.stmt->setString(1, libID);
+	db.stmt->setString(2, tmp);
 	db.QueryStatement();
 	db.~DBConnection();
 }

@@ -133,19 +133,23 @@
     <ClCompile Include="admin.cpp" />
     <ClCompile Include="book.cpp" />
     <ClCompile Include="DbConnection.cpp" />
+    <ClCompile Include="finePayment.cpp" />
     <ClCompile Include="issueBook.cpp" />
     <ClCompile Include="librarian.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="page.cpp" />
+    <ClCompile Include="report.cpp" />
     <ClCompile Include="user.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="admin.h" />
     <ClInclude Include="book.h" />
     <ClInclude Include="DbConnection.h" />
+    <ClInclude Include="finePayment.h" />
     <ClInclude Include="issueBook.h" />
     <ClInclude Include="librarian.h" />
     <ClInclude Include="page.h" />
+    <ClInclude Include="report.h" />
     <ClInclude Include="user.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

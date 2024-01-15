@@ -10,6 +10,9 @@
 #include <conio.h>
 using namespace std;
 
+int admin::adminCount = 0;
+string admin::tmp = "";
+
 admin::admin()
 {
 	adminID = "";
@@ -38,53 +41,10 @@ void admin::AddAdmin()
 	db.~DBConnection();
 }
 
-/*
-void admin::setPassword(string pass)
-{
-	adminPwd = encrypt(pass);
-}
-
-string admin::getPassword()
-{
-	return adminPwd;
-}
-
-bool admin::MatcPasswordWith(string plainText)
-{
-	return isMatch(adminPwd, plainText);
-}
-
-bool admin::isMatch(string encrypted, string testText)
-{
-	return (bool)(encrypt(testText) == encrypted);
-}
-
-string admin::encrypt(string input)
-{
-	string ciphertext = "";
-	for (int i = 0; i < input.length(); i++) {
-		ciphertext += toChar(input[i] + ((i ^ 2 + 1) * input.length()));
-	}
-	return ciphertext;
-}
-
-char admin::toChar(int asciDecimal)
-{
-	// convert int to reeadbale char based on ASCII
-	// characters in ASCII decimal are 32 (space) ~ 125 (~)
-	while (asciDecimal < 33) {
-		asciDecimal = asciDecimal + asciDecimal + 1;
-	}
-	while (asciDecimal > 125) {
-		asciDecimal = (asciDecimal % 125) + 32;
-	}
-	return (char)asciDecimal;
-}
-*/
 void admin::AdminCount()
 {
 	DBConnection db;
-	db.prepareStatement("SELECT COUNT(AdminName) AS ADMINCOUNT FROM admin");
+	db.prepareStatement("SELECT COUNT(AdminID) AS ADMINCOUNT FROM admin");
 	db.QueryResult();
 
 	if (db.res->rowsCount() == 1)
@@ -180,6 +140,33 @@ void admin::DeleteAdmin(string adminID)
 	DBConnection db;
 	db.prepareStatement("DELETE FROM admin WHERE AdminID = ?");
 	db.stmt->setString(1, adminID);
+	db.QueryStatement();
+	db.~DBConnection();
+}
+
+void admin::defineLastRow()
+{
+	DBConnection db;
+	db.prepareStatement("SELECT * FROM admin ORDER BY AdminID DESC LIMIT 1");
+	db.QueryResult();
+
+	if (db.res->rowsCount() == 1) {
+		while (db.res->next()) {
+			tmp = db.res->getString("AdminID");
+		}
+	}
+	else {
+		std::cout << "Error retrieving admin count." << std::endl;
+	}
+}
+
+void admin::updateLastRow()
+{
+	defineLastRow();
+	DBConnection db;
+	db.prepareStatement("UPDATE admin SET AdminID =? WHERE AdminID=?");
+	db.stmt->setString(1, adminID);
+	db.stmt->setString(2, tmp);
 	db.QueryStatement();
 	db.~DBConnection();
 }
