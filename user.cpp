@@ -16,6 +16,7 @@ using namespace std;
 using namespace sql;
 
 int userCount=0, userNo=0;
+string user::tmp = "";
 
 user::user()
 {
@@ -140,7 +141,11 @@ vector <user> user::SearchUser(string keyword)
 			users.push_back(tmpUser);
 		}
 	}
-
+	else
+	{
+		cout << "No user found! Please try again.";
+		_getch();
+	}
 	db.~DBConnection();
 	return users;
 }
@@ -187,6 +192,33 @@ void user::DeleteUser(string UID)
 	DBConnection db;
 	db.prepareStatement("DELETE FROM user WHERE UserID = ?");
 	db.stmt->setString(1, UID);
+	db.QueryStatement();
+	db.~DBConnection();
+}
+
+void user::defineLastRow()
+{
+	DBConnection db;
+	db.prepareStatement("SELECT * FROM user ORDER BY UserID DESC LIMIT 1");
+	db.QueryResult();
+
+	if (db.res->rowsCount() == 1) {
+		while (db.res->next()) {
+			tmp = db.res->getString("UserID");
+		}
+	}
+	else {
+		std::cout << "Error retrieving user count." << std::endl;
+	}
+}
+
+void user::updateLastRow()
+{
+	defineLastRow();
+	DBConnection db;
+	db.prepareStatement("UPDATE user SET UserID =? WHERE UserID=?");
+	db.stmt->setString(1, UID);
+	db.stmt->setString(2, tmp);
 	db.QueryStatement();
 	db.~DBConnection();
 }

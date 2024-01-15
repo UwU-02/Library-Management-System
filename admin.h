@@ -9,7 +9,8 @@ class admin
 {
 
 private:
-
+	static int adminCount;
+	static string tmp;
 
 public:
 	string adminID, adminPwd, adminName;
@@ -20,17 +21,13 @@ public:
 	void AdminCount();
 	void GenAdminID();
 	void AddAdmin();
-	//void setPassword(string pass);
-	//string getPassword();
-	//bool MatcPasswordWith(string plainText);
-	//bool isMatch(string encrypted, string testText);
-	//string encrypt(string input);
-	//char toChar(int asciDecimal);
 	bool AdminLogin();
 	void ViewAdmin();
 	void AdminUpdate();
 	void getAdminData(string adminID);
 	void DeleteAdmin(string adminID);
+	void defineLastRow();
+	void updateLastRow();
 
 };
 #endif

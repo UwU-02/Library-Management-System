@@ -7,12 +7,11 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <sstream>
 #include <stdlib.h>
 #include <conio.h>
+#include <sstream>
 #include <vector>
 #include <utility>
-#include <mysql/jdbc.h>
 
 using namespace std;
 using namespace sql;
@@ -50,9 +49,7 @@ void finePayment::insertPay()
 	db.stmt->setString(6, payMethod);
 	db.stmt->setString(7, payDate);
 	db.QueryStatement();
-	db.prepareStatement("UPDATE finepayment SET UID= (SELECT UID from `issue book` WHERE CaseID =?)");
-	db.stmt->setString(1, caseID);
-	db.QueryStatement();
+	db.~DBConnection();
 }
 
 void finePayment::payCount()
@@ -83,9 +80,8 @@ vector<finePayment> finePayment::LateReturnReport(string payDate)
 {
 	vector <finePayment> lrr;
 	DBConnection db;
-	db.prepareStatement("SELECT * FROM finepayment WHERE payDate >= ? ORDER BY payID ASC");
+	db.prepareStatement("SELECT * FROM finepayment WHERE payDate = ? ORDER BY payID ASC");
 	db.stmt->setString(1, payDate);
-
 	db.QueryResult();
 
 	if (db.res->rowsCount() > 0)
@@ -96,6 +92,12 @@ vector<finePayment> finePayment::LateReturnReport(string payDate)
 			lrr.push_back(tmpReport);
 		}
 	}
+	else
+	{
+		cout << "No data found! Please try again.";
+		_getch();
+	}
+
 	db.~DBConnection();
 	return lrr;
 }

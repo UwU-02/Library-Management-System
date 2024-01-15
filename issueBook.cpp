@@ -110,6 +110,9 @@ bool issueBook::checkCase()
 	db.QueryResult();
 	if (db.res->rowsCount() == 1) 
 	{
+		while (db.res->next()) {
+			UID = db.res->getString("UID");
+		}
 		db.~DBConnection();
 		return true;
 	}
@@ -197,12 +200,6 @@ void issueBook::DaysCal()
 	else
 		cout << "Error retrieving days count." << endl;
 }
-
-/*vector<report> report::brwReceipt(string caseID)
-{
-
-}*/
-
 
 issueBook::~issueBook()
 {
