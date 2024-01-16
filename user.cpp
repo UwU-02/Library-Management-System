@@ -93,7 +93,7 @@ bool user::isValidUser(string& username)
 	}
 	else
 	{
-		cout << "This book does not exist. Please try again." << endl;
+		cout << "This user does not exist. Please try again." << endl;
 		_getch();
 		db.~DBConnection();
 		return false;

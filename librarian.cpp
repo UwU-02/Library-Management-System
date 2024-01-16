@@ -177,7 +177,7 @@ void librarian::updateLastRow()
 {
 	defineLastRow();
 	DBConnection db;
-	db.prepareStatement("UPDATE book SET LibrarianID =? WHERE LibrarianID=?");
+	db.prepareStatement("UPDATE librarian SET LibrarianID =? WHERE LibrarianID=?");
 	db.stmt->setString(1, libID);
 	db.stmt->setString(2, tmp);
 	db.QueryStatement();

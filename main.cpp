@@ -155,6 +155,8 @@ void AdminRegister() //done
 			return;
 			break;
 		default:
+			cout << endl << endl << "Please choose between 1 - 5. Press Enter To Continue...";
+			_getch();
 			break;
 		}
 	}
@@ -205,6 +207,8 @@ void AdminLogin()//done
 			return;
 			break;
 		default:
+			cout << endl << endl << "Please choose between 1 - 5. Press Enter To Continue...";
+			_getch();
 			break;
 		}
 	}
@@ -236,6 +240,8 @@ void AdminMenu(admin admin) //done
 			main();
 			break;
 		default:
+			cout << endl << endl << "Please choose between 1 - 4. Press Enter To Continue...";
+			_getch();
 			break;
 		}
 	}
@@ -319,6 +325,8 @@ admin UpdateAdmin(admin Admin)
 			}
 			break;
 		default:
+			cout << endl << endl << "Please choose between 1 - 6. Press Enter To Continue...";
+			_getch();
 			break;
 		}
 	}
@@ -381,6 +389,8 @@ void LibrarianRegister() //done
 			return;
 			break;
 		default:
+			cout << endl << endl << "Please choose between 1 - 5. Press Enter To Continue...";
+			_getch();
 			break;
 		}
 	}
@@ -421,6 +431,8 @@ void LibrarianLogin()
 			return;
 			break;
 		default:
+			cout << endl << endl << "Please choose between 1 - 3. Press Enter To Continue...";
+			_getch();
 			break;
 		}
 	}
@@ -1035,7 +1047,6 @@ void InsertBook() //done
 			if (valid)
 			{
 				newBook.GenBID();
-				//insertPage.setValue(9, newBook.bID);
 				newBook.AddBook();
 				cout << "______________________________________________________\n\n";
 				cout << "\tThe book ID is " << newBook.bID << endl;
@@ -1890,7 +1901,7 @@ void lateReturnRepo()
 	rep.addOption("Checkout Date");
 	rep.addOption("Go");
 	rep.addOption("Back");
-
+	stringstream ff;
 	while (1)
 	{
 		stringstream ss;
@@ -1927,26 +1938,27 @@ void lateReturnRepo()
 		case 2:
 			result.clear();
 			result = finePayment::LateReturnReport(payDate);
+			
 			if (outputFile.is_open())
 			{
-				ss.str(""); // Clear the stringstream
-				ss.clear();
-				ss << "===================================================================================\n                                   Late Return                                     \n===================================================================================\n";
+				//ss.str(""); // Clear the stringstream
+				//ss.clear();
+				ff << "===================================================================================\n                                   Late Return                                     \n===================================================================================\n";
 
-				ss << endl << setfill(' ') << '|' << left << setw(15) << "     PaymentID      " << setfill(' ') << '|' << setw(10) << "    UserID      " << setfill(' ') << '|' << setw(10) << "     Fine      " << setfill(' ') << '|' << setw(25) << "     Payment Method         " << setfill(' ') << '|' << endl;
-
+				ff << endl << setfill(' ') << '|' << left << setw(15) << "     PaymentID      " << setfill(' ') << '|' << setw(10) << "    UserID      " << setfill(' ') << '|' << setw(10) << "     Fine      " << setfill(' ') << '|' << setw(25) << "     Payment Method         " << setfill(' ') << '|' << endl;
+				double totalfine = 0;
 				for (int i = 0; i < result.size(); i++)
 				{
-					ss << endl << setfill(' ') << '|' << left << "     " << setw(15) << result[i].payID << setfill(' ') << '|' << "    " << setw(12) << result[i].UID << setfill(' ') << '|' << setw(10) << "     RM" << result[i].fine << "  " << setfill(' ') << '|' << "     " << setw(23) << result[i].payMethod << setfill(' ') << '|' << endl;
-
+					ff << endl << setfill(' ') << '|' << left << "     " << setw(15) << result[i].payID << setfill(' ') << '|' << "    " << setw(12) << result[i].UID << setfill(' ') << '|' << setw(10) << "     RM" << result[i].fine << "  " << setfill(' ') << '|' << "     " << setw(23) << result[i].payMethod << setfill(' ') << '|' << endl;
+					totalfine += result[i].fine;
 				}
 
-				ss << "\n\n_____________________________________________________________________________________" << endl << endl;
-				ss << "Total Fine: RM " << setprecision(2) << totalFine << endl;
-				ss << "Date: " << payDate << endl;
-				ss << "_____________________________________________________________________________________" << endl;
+				ff<< "\n\n_____________________________________________________________________________________" << endl << endl;
+				ff << "Total Fine: RM " << setprecision(2) << totalfine << endl;
+				ff << "Date: " << payDate << endl;
+				ff << "_____________________________________________________________________________________" << endl;
 
-				outputFile << ss.str();
+				outputFile << ff.str();
 				outputFile.close();
 			}
 			else 
